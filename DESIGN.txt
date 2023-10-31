@@ -1,0 +1,194 @@
+Keywords
+
+if else for while do goto break continue return sizeof containerof struct union switch
+inline static void uint8 uint16 uint32 uint64 int8 int16 int32 int64 bool const include
+
+Expression
+
+Primary
+	string literal
+	integer constant
+	identifier
+	sizeof ( type-name )
+	containerof ( expression , struct identifier, identifier )
+	( expression )
+	type-name ( expression )
+
+Call Argument List
+	expression
+	call-arg-list , expression
+
+Postfix
+	primary
+	postfix ( call-arg-list )
+	postfix [ expression ]
+	postfix ++
+	postfix --
+	postfix . identifier
+	postfix -> identifier
+
+Prefix
+	postfix
+	- prefix
+	~ prefix
+	! prefix
+	& prefix
+	* prefix
+	-- prefix
+	++ prefix
+
+Binary
+	x<< x>>
+	x* x/ x%
+	x& x^ x|
+	x+ x-
+	x< x<= x> x>=
+	x== x!=
+	x&&
+	x||
+
+Ternary
+	binary ? ternary : ternary
+
+Expression
+	ternary
+	ternary = expression
+	ternary <<= expression
+	ternary >>= expression
+	ternary *= expression
+	ternary /= expression
+	ternary %= expression
+	ternary += expression
+	ternary -= expression
+	ternary &= expression
+	ternary ^= expression
+	ternary |= expression
+	ternary ~= expression
+
+Argument List
+	type-name
+	type-name identifier
+	arg-list , type-name
+	arg-list , type-name identifier
+
+Type Name
+	void
+	uint8
+	uint16
+	uint32
+	uint64
+	int8
+	int16
+	int32
+	int64
+	struct identifier
+	type-name *
+	type-name @ ( arg-list )
+
+Variable Declaration
+	type-name identifier ;
+	type-name identifier = expression ;
+	type-name identifier [ int-const ] ;
+	type-name identifier [ int-const ] = { expr-list } ;
+	const type-name identifier = constant-expression ;
+	const type-name identifier [ int-const ] = { constant-expr-list } ;
+
+Expression List
+	expression
+	expr-list , expression
+
+Named Expression
+	expression
+	.identifier = expression
+
+Named Expression List
+	named-expression
+	named-expression-list, named-expression
+
+Function Declaration
+	type-name identifier ( arg-list ) ;
+	static type-name identifier ( arg-list ) ;
+	inline type-name identifier ( arg-list ) ;
+	static inline type-name identifier ( arg-list ) ;
+
+Function Definition
+	func-decl compound-statement
+
+Struct Declaration
+	struct identifier { member-list } ;
+	union struct identifier { member-list } ;
+
+Member
+	type-name
+	type-name identifier
+	type-name identifier [ int-const ]
+	type-name [ int-const ]
+
+Member List
+	member ;
+	member-list member ;
+	member-list type-name identifier [ ] ;
+
+Declaration
+	var-decl
+	func-decl
+	func-def
+	struct-decl
+
+Statement
+	labeled-statement
+	compound-statement
+	expression-statement
+	selection-statement
+	iteration-statement
+	jump-statement
+
+Labeled Statement
+	identifier : statement
+
+Compound Statement
+	{ block-item-list }
+	{ }
+
+Block Item List
+	var-decl
+	statement
+	block-item-list var-decl
+	block-item-list statement
+
+Expression Statement
+	expression ;
+	;
+
+Selection Statement
+	if ( expression ) statement
+	if ( expression ) statement else statement
+	switch ( expression ) { case-list }
+
+Case List
+	constant-expression : statement
+	case-list constant-expression : statement
+
+Iteration Statement
+	while ( expression ) statement
+	do statement while ( expression ) ;
+	for ( var-decl expression ; expression ) statement
+
+Jump Statement
+	goto identifier ;
+	continue ;
+	break ;
+	return ;
+	return expression ;
+
+Include List
+	include string-literal ;
+	include-list include string-literal ;
+
+Source Item List
+	declaration
+	source-item-list declaration
+
+Source File
+	include-list
+	source-item-list

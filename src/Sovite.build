@@ -1,0 +1,22 @@
+bin_dir "../bin"
+compile "clang -Wall -Wextra -Werror -Wno-unused -Wno-multichar -std=gnu11 -O3 -IInc -g -funsigned-char -fsanitize=address,undefined -c %src_file% -o %obj_file%"
+link "clang -g -fsanitize=address,undefined %obj_files% -o kcc"
+
+targets
+[
+	<Main.c>      [ <Inc/Parse.h>  ]
+	<Lex.c>       [ <Inc/Lex.h>    ]
+	<Parse.c>     [ <Inc/Parse.h>  ]
+	<ParseUtil.c> [ <Inc/Parse.h>  ]
+	<Type.c>      [ <Inc/Type.h>   ]
+	<Util.c>      [ <Inc/Common.h> ]
+]
+
+dependencies
+[
+	<Inc/Parse.h>  [ <Inc/Lex.h>    <Inc/Type.h>   ]
+	<Inc/Lex.h>    [ <Inc/Hashes.h> <Inc/Common.h> ]
+	<Inc/Type.h>   [ <Inc/Common.h>                ]
+	<Inc/Hashes.h>
+	<Inc/Common.h>
+]
