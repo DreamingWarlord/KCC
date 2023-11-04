@@ -13,7 +13,6 @@ struct Scope
 
 
 static struct Scope *scope_head = NULL;
-
 static struct Object *glbl_object_tab[GLBL_OBJECT_TABLE_SIZE] = { NULL };
 
 

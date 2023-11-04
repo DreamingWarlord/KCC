@@ -1,5 +1,6 @@
 #include "Type.h"
 
+
 #define STRUCT_TABLE_SIZE 2048
 #define FUNC_TABLE_SIZE 2048
 #define FUNC_SIZE(funct) (sizeof(struct Function) - 8 + (funct)->count * sizeof(struct Type))
@@ -8,7 +9,6 @@
 static const char *type_name_table[] = {
 	"void", "uint8", "uint16", "uint32", "int64", "int8", "int16", "int32", "int64", "struct"
 };
-
 static struct Struct *struct_table[STRUCT_TABLE_SIZE] = { NULL };
 static struct Function *func_table[FUNC_TABLE_SIZE] = { NULL };
 

@@ -10,7 +10,6 @@ struct TokenList
 
 
 static struct Token *tok = NULL;
-
 static struct TokenList *toklist_head = NULL;
 
 

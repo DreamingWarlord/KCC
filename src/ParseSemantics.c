@@ -5,19 +5,12 @@
 
 
 static struct Function *ctx_func = NULL;
-
 static char *ctx_labels[MAX_GOTOS] = { NULL };
-
 static uint64 ctx_label_count = 0;
-
 static char *ctx_gotos[MAX_GOTOS] = { NULL };
-
 static uint64 ctx_goto_count = 0;
-
 static uint64 ctx_goto_match_count = 0;
-
 static uint64 ctx_switch_count = 0;
-
 static uint64 ctx_loop_count = 0;
 
 
