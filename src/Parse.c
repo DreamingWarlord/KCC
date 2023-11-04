@@ -1421,24 +1421,25 @@ struct Statement *ParseFuncDecl()
 	return stmt;
 }
 
-bool ParseInclude()
+void ParseIncludes()
 {
-	if(tok->tok != TK_KWORD || tok->hash != KW_INCLUDE)
-		return FALSE;
+	while(1) {
+		if(tok->tok != TK_KWORD || tok->hash != KW_INCLUDE)
+			break;
 
-	if(TokenFetch() != TK_STR)
-		TokenError(tok, "Expected include file name as string, got %s", TokenStr(tok));
+		if(TokenFetch() != TK_STR)
+			TokenError(tok, "Expected include file name as string, got %s", TokenStr(tok));
 
-	char *file_name = tok->str;
+		char *file_name = tok->str;
 
-	if(TokenFetch() != ';')
-		TokenError(tok, "Expected ';', got %s", TokenStr(tok));
+		if(TokenFetch() != ';')
+			TokenError(tok, "Expected ';', got %s", TokenStr(tok));
 
-	if(!LexFile(file_name))
-		TokenError(tok, "File %s can't be included", file_name);
+		if(!LexFile(file_name))
+			TokenError(tok, "File %s can't be included", file_name);
 
-	TokenFetch();
-	return TRUE;
+		TokenFetch();
+	}
 }
 
 struct Statement *ParseDecl()
@@ -1456,15 +1457,12 @@ struct Statement *ParseDecl()
 
 struct Statement *Parse()
 {
-	bool is_inc = TRUE;
-
-	while(is_inc)
-		is_inc = ParseInclude();
-
+	ParseIncludes();
 	struct Statement *stmt = ParseDecl();
 	struct Statement *cur = stmt;
 
 	while(cur != NULL) {
+		ParseIncludes();
 		cur->next = ParseDecl();
 		cur = cur->next;
 	}

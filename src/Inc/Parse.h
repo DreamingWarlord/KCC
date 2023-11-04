@@ -225,7 +225,7 @@ struct Statement *ParseStructDecl();
 
 struct Statement *ParseFuncDecl();
 
-bool ParseInclude();
+void ParseIncludes();
 
 struct Statement *ParseDecl();
 

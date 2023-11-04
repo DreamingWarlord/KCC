@@ -1,6 +1,9 @@
 #include "Lex.h"
 
 
+#define MAX_LEX_FILES 2048
+
+
 struct Source
 {
 	char  *name;
@@ -15,6 +18,8 @@ struct Source
 
 static struct Source *src = NULL;
 static uint64 keyword_hashes[] = { KW_IF, KW_ELSE, KW_FOR, KW_WHILE, KW_DO, KW_GOTO, KW_BREAK, KW_CONTINUE, KW_RETURN, KW_SIZEOF, KW_CONTAINEROF, KW_STRUCT, KW_UNION, KW_SWITCH, KW_INLINE, KW_STATIC, KW_BOOL, KW_UINT8, KW_UINT16, KW_UINT32, KW_UINT64, KW_INT8, KW_INT16, KW_INT32, KW_INT64, KW_VOID, KW_CONST, KW_INCLUDE };
+static uint64 lexed_files[MAX_LEX_FILES] = { 0 };
+static uint64 lexed_file_count = 0;
 
 
 static bool LexEOF()
@@ -430,12 +435,21 @@ bool LexFile(char *file_name)
 {
 	struct Source *new_src = Alloc(sizeof(struct Source));
 	new_src->name = file_name;
-
 	FILE *f = fopen(file_name, "r");
 
 	if(f == NULL)
 		return FALSE;
 
+	char *real_name = realpath(file_name, NULL);
+	uint64 hash = Hash(real_name, strlen(real_name));
+	free(real_name);
+
+	for(uint64 i = 0; i < lexed_file_count; i++) {
+		if(lexed_files[i] == hash)
+			return TRUE;
+	}
+
+	lexed_files[lexed_file_count++] = hash;
 	fseek(f, 0, SEEK_END);
 	uint64 size = ftell(f);
 	new_src->text = Alloc(size + 1);
