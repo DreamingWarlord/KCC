@@ -307,7 +307,7 @@ void StatementValidate(struct Statement *stmt)
 	case STMT_RETURN:
 		ExprNodeBuildType(stmt->expr);
 
-		if(stmt->expr != NULL && !TypeCmp(stmt->expr->type, ctx_func->type))
+		if(stmt->expr != NULL && !TypeCastable(stmt->expr->type, ctx_func->type))
 			TokenError(stmt->token, "Return type doesn't match function signature");
 
 		if(stmt->expr == NULL && (ctx_func->type.ptrc != 0 || ctx_func->type.kind != KIND_VOID))
