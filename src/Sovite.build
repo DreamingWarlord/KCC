@@ -4,12 +4,13 @@ link "clang -g -fsanitize=address,undefined %obj_files% -o kcc"
 
 targets
 [
-	<Main.c>      [ <Inc/Parse.h>  ]
-	<Lex.c>       [ <Inc/Lex.h>    ]
-	<Parse.c>     [ <Inc/Parse.h>  ]
-	<ParseUtil.c> [ <Inc/Parse.h>  ]
-	<Type.c>      [ <Inc/Type.h>   ]
-	<Util.c>      [ <Inc/Common.h> ]
+	<Main.c>           [ <Inc/Parse.h>  ]
+	<Lex.c>            [ <Inc/Lex.h>    ]
+	<Parse.c>          [ <Inc/Parse.h>  ]
+	<ParseUtil.c>      [ <Inc/Parse.h>  ]
+	<ParseSemantics.c> [ <Inc/Parse.h>  ]
+	<Type.c>           [ <Inc/Type.h>   ]
+	<Util.c>           [ <Inc/Common.h> ]
 ]
 
 dependencies

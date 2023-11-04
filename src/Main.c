@@ -17,5 +17,6 @@ int main(int argc, char *argv[])
 	TokenFetch();
 	struct Statement *stmt = Parse();
 	StatementPrint(stmt);
+	StatementValidate(stmt);
 	return 0;
 }

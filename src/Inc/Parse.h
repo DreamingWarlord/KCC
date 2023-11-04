@@ -4,8 +4,6 @@
 #include "Type.h"
 
 
-#define GLBL_OBJECT_TABLE_SIZE 2048
-
 #define EXPR_CONST        0
 #define EXPR_OBJECT       1
 #define EXPR_FUNCALL      2
@@ -113,11 +111,6 @@ struct Statement
 
 	union {
 		struct {
-			struct ExprNode *lhs;
-			struct ExprNode *rhs;
-		} assignment;
-
-		struct {
 			struct Object    *obj;
 			struct ExprList *expr;
 		} var_decl;
@@ -184,6 +177,10 @@ bool ExprNodeEvaluate(struct ExprNode *node, uint64 *res);
 
 bool ExprNodeConst(struct ExprNode *node);
 
+bool ExprNodeRef(struct ExprNode *node);
+
+void ExprNodeBuildType(struct ExprNode *node);
+
 void StatementPrint(struct Statement *stmt);
 
 bool ParseTypePrimitive(struct Type *type);
@@ -233,3 +230,5 @@ bool ParseInclude();
 struct Statement *ParseDecl();
 
 struct Statement *Parse();
+
+void StatementValidate(struct Statement *stmt);

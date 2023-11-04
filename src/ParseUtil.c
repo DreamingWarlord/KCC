@@ -1,6 +1,9 @@
 #include "Parse.h"
 
 
+#define GLBL_OBJECT_TABLE_SIZE 2048
+
+
 struct Scope
 {
 	struct Scope     *next;

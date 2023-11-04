@@ -648,6 +648,9 @@ struct Statement *ParseVarDecl(bool allow_def)
 	if(tok->tok != TK_IDENT && is_const)
 		TokenError(tok, "Expected constant variable name, got %s", TokenStr(tok));
 
+	if(TypeSize(type) == 0)
+		TokenError(tok, "Can't declare a variable of incomplete type");
+
 	struct Object *var = Alloc(sizeof(struct Object));
 	var->name = tok->str;
 	var->type = type;
@@ -990,6 +993,9 @@ struct Statement *ParseSwitch()
 
 		struct ExprNode *label = ParseExpression();
 
+		if(label == NULL)
+			TokenError(tok, "Expected case label, got %s", TokenStr(tok));
+
 		if(!ExprNodeConst(label))
 			TokenError(tok, "Case label has to be constant");
 
@@ -1002,8 +1008,7 @@ struct Statement *ParseSwitch()
 		if(case_stmt == NULL)
 			TokenError(tok, "Expected statement after case label");
 
-		if(!ExprNodeEvaluate(label, &case_stmt->case_label))
-			TokenError(tok, "Case label has to be constant (compiler bug)");
+		ExprNodeEvaluate(label, &case_stmt->case_label);
 
 		if(head == NULL) {
 			head = case_stmt;
@@ -1373,14 +1378,14 @@ struct Statement *ParseFuncDecl()
 	if(obj == NULL) {
 		obj = Alloc(sizeof(struct Object));
 		obj->name = name;
-		obj->type = (struct Type) { KIND_FUNC, 0, func_idx };
+		obj->type = (struct Type) { KIND_FUNC, 1, func_idx };
 		obj->count = 1;
 		obj->is_const = TRUE;
 		obj->func.is_static = is_static;
 		obj->func.is_inline = is_inline;
 		Assert(GlblObjectTableInsert(obj));
 	} else {
-		if(memcmp(&obj->type, &(struct Type) { KIND_FUNC, 0, func_idx }, sizeof(struct Type)))
+		if(memcmp(&obj->type, &(struct Type) { KIND_FUNC, 1, func_idx }, sizeof(struct Type)))
 			TokenError(tok, "Function template does not match original");
 
 		if(obj->func.is_static != is_static || obj->func.is_inline != is_inline)

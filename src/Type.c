@@ -195,3 +195,39 @@ char *TypeStr(struct Type type)
 
 	return str;
 }
+
+bool TypeCmp(struct Type a, struct Type b)
+{
+	return !memcmp(&a, &b, sizeof(struct Type));
+}
+
+bool TypeCastable(struct Type a, struct Type b)
+{
+	if(TypeCmp(a, (struct Type) { KIND_VOID, 0, 0 }))
+		return FALSE;
+
+	if(TypeCmp(b, (struct Type) { KIND_VOID, 0, 0 }))
+		return FALSE;
+
+	if((a.kind == KIND_STRUCT && a.ptrc == 0) || (b.kind == KIND_STRUCT && b.ptrc == 0))
+		return FALSE;
+
+	if(a.ptrc > 0 && b.ptrc == 0 && b.kind != KIND_UINT64)
+		return FALSE;
+
+	if(a.ptrc == 0 && (a.kind != KIND_UINT64 || b.ptrc == 0) && TypeInt(a) && !TypeInt(b))
+		return FALSE;
+
+	return TRUE;
+}
+
+bool TypeInt(struct Type type)
+{
+	return type.ptrc == 0 && (type.kind >= KIND_UINT8 && type.kind <= KIND_INT64);
+}
+
+bool TypeSigned(struct Type type)
+{
+	Assert(TypeInt(type));
+	return type.kind > KIND_UINT64;
+}

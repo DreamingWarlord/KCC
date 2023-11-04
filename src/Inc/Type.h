@@ -63,3 +63,11 @@ struct Function *FunctionGet(uint64 idx);
 uint64 TypeSize(struct Type type);
 
 char *TypeStr(struct Type type);
+
+bool TypeCmp(struct Type a, struct Type b);
+
+bool TypeCastable(struct Type a, struct Type b);
+
+bool TypeInt(struct Type type);
+
+bool TypeSigned(struct Type type);
