@@ -79,6 +79,16 @@ void ExprNodeBuildType(struct ExprNode *node)
 			TokenError(node->token, "Can't cast %s to %s", TypeStr(node->lhs->type), TypeStr(node->type));
 
 		break;
+	case EXPR_CAST_EXT:
+		ExprNodeBuildType(node->lhs);
+
+		if(!TypeCastable(node->lhs->type, node->type))
+			TokenError(node->token, "Can't cast %s to %s", TypeStr(node->lhs->type), TypeStr(node->type));
+
+		if(TypeSize(node->lhs->type) >= TypeSize(node->type))
+			TokenError(node->token, "Sign extended cast must be only done when upscaling a type");
+
+		break;
 	case EXPR_POST_INC:
 	case EXPR_POST_DEC:
 	case EXPR_PRE_INC:
