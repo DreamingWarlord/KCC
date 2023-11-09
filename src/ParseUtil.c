@@ -232,6 +232,8 @@ void ExprNodePrint(struct ExprNode *node)
 		return;
 	}
 
+	printf("%s(", TypeStr(node->type));
+
 	switch(node->kind)
 	{
 	case EXPR_CONST:
@@ -322,6 +324,8 @@ void ExprNodePrint(struct ExprNode *node)
 		printf(")");
 		break;
 	}
+
+	printf(")");
 }
 
 char *ExprNodeStr(uint64 kind)
