@@ -130,6 +130,9 @@ bool ParseType(struct Type *type)
 				if(!ParseType(&func_templ->args[func_templ->count++]))
 					TokenError(tok, "Expected valid function argument type, got %s", TokenStr(tok));
 
+				if(TypeSize(func_templ->args[func_templ->count - 1]) == 0)
+					TokenError(tok, "Incomplete function argument type");
+
 				if(tok->tok == TK_IDENT)
 					TokenFetch();
 
@@ -380,7 +383,10 @@ struct ExprNode *ParsePostfix()
 
 			wrapper->kind = EXPR_FUNCALL;
 			wrapper->lhs = node;
-			wrapper->list = head;
+
+			if(head->node != NULL)
+				wrapper->list = head;
+
 			break;
 		}
 		default:
@@ -524,12 +530,8 @@ struct ExprList *ParseExpressionList(uint64 max_count)
 	while(1) {
 		cur->node = ParseExpression();
 
-		if(cur->node == NULL) {
-			if(tok->tok == '}')
-				break;
-
+		if(cur->node == NULL)
 			TokenError(tok, "Expected expression, got %s", TokenStr(tok));
-		}
 
 		count++;
 
@@ -1352,6 +1354,9 @@ struct Statement *ParseFuncDecl()
 		if(!ParseType(&func_templ->args[func_templ->count]))
 			TokenError(tok, "Expected argument type, got %s", TokenStr(tok));
 
+		if(TypeSize(func_templ->args[func_templ->count]) == 0)
+			TokenError(tok, "Incomplete function argument type");
+
 		if(tok->tok != TK_IDENT)
 			TokenError(tok, "Expected argument name, got %s", TokenStr(tok));
 
@@ -1411,6 +1416,7 @@ struct Statement *ParseFuncDecl()
 		arg_obj->name = arg_names[i];
 		arg_obj->type = func_templ->args[i];
 		arg_obj->count = 1;
+		obj->func.args[i] = arg_obj;
 
 		if(!ScopeInsert(arg_obj))
 			TokenError(tok, "Could not create object for argument %s", arg_names[i]);

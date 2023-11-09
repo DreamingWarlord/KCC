@@ -7,7 +7,7 @@
 
 
 static const char *type_name_table[] = {
-	"void", "uint8", "uint16", "uint32", "int64", "int8", "int16", "int32", "int64", "struct"
+	"void", "uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64", "struct"
 };
 static struct Struct *struct_table[STRUCT_TABLE_SIZE] = { NULL };
 static struct Function *func_table[FUNC_TABLE_SIZE] = { NULL };

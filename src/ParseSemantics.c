@@ -64,7 +64,7 @@ void ExprNodeBuildType(struct ExprNode *node)
 
 			ExprNodeBuildType(cur->node);
 
-			if(argc < func->count && !TypeCmp(cur->node->type, func->args[argc]))
+			if(argc < func->count && !TypeCastable(cur->node->type, func->args[argc]))
 				TokenError(cur->node->token, "Function call argument type does not match");
 
 			cur = cur->next;
@@ -213,7 +213,7 @@ void ExprNodeBuildType(struct ExprNode *node)
 		ExprNodeBuildType(node->lhs);
 		ExprNodeBuildType(node->rhs);
 
-		if(!TypeCmp(node->lhs->type, node->rhs->type))
+		if(!TypeCastable(node->lhs->type, node->rhs->type))
 			TokenError(node->token, "Incompatible types in comparison");
 
 		if(node->lhs->type.ptrc == 0 && !TypeInt(node->lhs->type))

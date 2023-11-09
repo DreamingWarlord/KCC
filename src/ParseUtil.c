@@ -132,9 +132,18 @@ static void StatementPrintInd(struct Statement *stmt, uint64 ind)
 		if(stmt->var_decl.obj->count > 1)
 			printf("[%lu]", stmt->var_decl.obj->count);
 
-		if(stmt->var_decl.expr != NULL) {
+		if(stmt->var_decl.expr != NULL || stmt->var_decl.obj->is_const) {
 			printf(" = ");
-			struct ExprList *cur = stmt->var_decl.expr;
+			struct ExprList *cur = NULL;
+
+			if(stmt->var_decl.expr != NULL) {
+				cur = stmt->var_decl.expr;
+			} else if(stmt->var_decl.obj->expr != NULL) {
+				cur = stmt->var_decl.obj->expr;
+			} else {
+				printf("<buf>;\n");
+				break;
+			}
 
 			if(cur->next == NULL) {
 				ExprNodePrint(cur->node);
@@ -168,10 +177,8 @@ static void StatementPrintInd(struct Statement *stmt, uint64 ind)
 		printf("%s %s", TypeStr(stmt->func->type), stmt->func->name);
 
 		if(stmt->func->func.body != NULL) {
-			printf(" {\n");
-			StatementPrintInd(stmt->func->func.body, ind + 1);
-			Indent(ind);
-			printf("}\n");
+			printf("\n");
+			StatementPrintInd(stmt->func->func.body, ind);
 		} else {
 			printf(";\n");
 		}

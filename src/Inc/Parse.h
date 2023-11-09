@@ -74,6 +74,7 @@ struct Object
 			bool         is_static;
 			bool         is_inline;
 			struct Statement *body;
+			struct Object    *args[8];
 		} func;
 	};
 };
