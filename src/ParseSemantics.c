@@ -20,12 +20,6 @@ bool ExprNodeRef(struct ExprNode *node)
 	{
 	case EXPR_OBJECT:
 		return !node->obj->is_const;
-	case EXPR_CAST:
-	case EXPR_POST_INC:
-	case EXPR_POST_DEC:
-	case EXPR_PRE_INC:
-	case EXPR_PRE_DEC:
-		return ExprNodeRef(node->lhs);
 	case EXPR_TERNARY:
 		return ExprNodeRef(node->lhs) && ExprNodeRef(node->rhs);
 	case EXPR_MEMBER:
