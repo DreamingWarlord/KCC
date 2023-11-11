@@ -17,7 +17,7 @@ struct Source
 
 
 static struct Source *src = NULL;
-static uint64 keyword_hashes[] = { KW_IF, KW_ELSE, KW_FOR, KW_WHILE, KW_DO, KW_GOTO, KW_BREAK, KW_CONTINUE, KW_RETURN, KW_SIZEOF, KW_CONTAINEROF, KW_STRUCT, KW_UNION, KW_SWITCH, KW_INLINE, KW_STATIC, KW_BOOL, KW_UINT8, KW_UINT16, KW_UINT32, KW_UINT64, KW_INT8, KW_INT16, KW_INT32, KW_INT64, KW_VOID, KW_CONST, KW_INCLUDE };
+static uint64 keyword_hashes[] = { KW_IF, KW_ELSE, KW_FOR, KW_WHILE, KW_DO, KW_GOTO, KW_BREAK, KW_CONTINUE, KW_RETURN, KW_SIZEOF, KW_CONTAINEROF, KW_STRUCT, KW_UNION, KW_SWITCH, KW_INLINE, KW_STATIC, KW_BOOL, KW_INT8, KW_INT16, KW_INT32, KW_INT64, KW_VOID, KW_CONST, KW_INCLUDE };
 static uint64 lexed_files[MAX_LEX_FILES] = { 0 };
 static uint64 lexed_file_count = 0;
 
@@ -407,6 +407,17 @@ uint64 Lex(struct Token *tok)
 		} else if(LexCurCh() == '=') {
 			tok->tok <<= 8;
 			tok->tok |= LexCurCh();
+		} else if(LexCurCh() == '+') {
+			tok->tok <<= 8;
+			tok->tok |= LexCurCh();
+			LexCh();
+
+			if(LexCurCh() == '=') {
+				tok->tok <<= 8;
+				tok->tok |= LexCurCh();
+			} else {
+				LexUnCh();
+			}
 		} else {
 			LexUnCh();
 		}

@@ -50,18 +50,6 @@ bool ParseTypePrimitive(struct Type *type)
 	case KW_VOID:
 		type->kind = KIND_VOID;
 		break;
-	case KW_UINT8:
-		type->kind = KIND_UINT8;
-		break;
-	case KW_UINT16:
-		type->kind = KIND_UINT16;
-		break;
-	case KW_UINT32:
-		type->kind = KIND_UINT32;
-		break;
-	case KW_UINT64:
-		type->kind = KIND_UINT64;
-		break;
 	case KW_INT8:
 		type->kind = KIND_INT8;
 		break;
@@ -167,16 +155,16 @@ struct ExprNode *ParsePrimary()
 	{
 	case TK_STR:
 		node->kind = EXPR_OBJECT;
-		node->type = (struct Type) { KIND_UINT8, 1, 0 };
+		node->type = (struct Type) { KIND_INT8, 1, 0 };
 		node->obj = Alloc(sizeof(struct Object));
 		node->obj->name = "<str>";
-		node->obj->type = (struct Type) { KIND_UINT8, 0, 0 };
+		node->obj->type = (struct Type) { KIND_INT8, 0, 0 };
 		node->obj->count = tok->num + 1;
 		node->obj->buf = tok->str;
 		break;
 	case TK_INT:
 		node->kind = EXPR_CONST;
-		node->type = (struct Type) { KIND_UINT64, 0, 0 };
+		node->type = (struct Type) { KIND_INT64, 0, 0 };
 		node->num = tok->num;
 		break;
 	case TK_IDENT:
@@ -211,13 +199,13 @@ struct ExprNode *ParsePrimary()
 			TokenFetch();
 			node->kind = EXPR_CONST;
 			node->num = TypeSize(node->type);
-			node->type = (struct Type) { KIND_UINT64, 0, 0 };
+			node->type = (struct Type) { KIND_INT64, 0, 0 };
 		} else if(tok->hash == KW_CONTAINEROF) {
 			if(TokenFetch() != '(')
 				TokenError(tok, "Expected '(', got %s", TokenStr(tok));
 
 			node->kind = EXPR_CAST;
-			node->type = (struct Type) { KIND_UINT8, 1, 0 };
+			node->type = (struct Type) { KIND_INT8, 1, 0 };
 			node->lhs = ParseExpression();
 
 			if(node->lhs == NULL)
@@ -259,7 +247,7 @@ struct ExprNode *ParsePrimary()
 			const_node->kind = EXPR_CONST;
 			const_node->token = tok;
 			const_node->num = member->offset;
-			const_node->type = (struct Type) { KIND_UINT64, 0, 0 };
+			const_node->type = (struct Type) { KIND_INT64, 0, 0 };
 			struct ExprNode *offset_node = Alloc(sizeof(struct ExprNode));
 			offset_node->kind = EXPR_SUB;
 			offset_node->token = tok;
@@ -272,10 +260,15 @@ struct ExprNode *ParsePrimary()
 			if(TokenFetch() != ')')
 				TokenError(tok, "Expected ')', got %s", TokenStr(tok));
 		} else {
-			node->kind = EXPR_CAST;
-
 			if(!ParseType(&node->type))
 				return NULL;
+
+			if(tok->tok == '+') {
+				node->kind = EXPR_CAST_EXT;
+				TokenFetch();
+			} else {
+				node->kind = EXPR_CAST;
+			}
 
 			if(tok->tok != '(')
 				TokenError(tok, "Expected '(', got %s", TokenStr(tok));

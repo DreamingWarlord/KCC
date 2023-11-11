@@ -263,6 +263,11 @@ void ExprNodePrint(struct ExprNode *node)
 		ExprNodePrint(node->lhs);
 		printf(")");
 		break;
+	case EXPR_CAST_EXT:
+		printf("%s+(", TypeStr(node->type));
+		ExprNodePrint(node->lhs);
+		printf(")");
+		break;
 	case EXPR_POST_INC:
 		ExprNodePrint(node->lhs);
 		printf("++");
@@ -332,25 +337,29 @@ char *ExprNodeStr(uint64 kind)
 {
 	switch(kind)
 	{
-	case EXPR_SHL:    return "<<";
-	case EXPR_SHR:    return ">>";
-	case EXPR_MUL:    return "*";
-	case EXPR_DIV:    return "/";
-	case EXPR_MOD:    return "%";
-	case EXPR_AND:    return "&";
-	case EXPR_XOR:    return "^";
-	case EXPR_OR:     return "|";
-	case EXPR_ADD:    return "+";
-	case EXPR_SUB:    return "-";
-	case EXPR_LT:     return "<";
-	case EXPR_LTE:    return "<=";
-	case EXPR_GT:     return ">";
-	case EXPR_GTE:    return ">=";
-	case EXPR_EQ:     return "==";
-	case EXPR_NEQ:    return "!=";
-	case EXPR_LAND:   return "&&";
-	case EXPR_LOR:    return "||";
-	case EXPR_ASSIGN: return "=";
+	case EXPR_SHL:     return "<<";
+	case EXPR_SHR:     return ">>";
+	case EXPR_MUL:     return "*";
+	case EXPR_DIV:     return "/";
+	case EXPR_MOD:     return "%";
+	case EXPR_AND:     return "&";
+	case EXPR_XOR:     return "^";
+	case EXPR_OR:      return "|";
+	case EXPR_ADD:     return "+";
+	case EXPR_SUB:     return "-";
+	case EXPR_LT:      return "<";
+	case EXPR_LTE:     return "<=";
+	case EXPR_GT:      return ">";
+	case EXPR_GTE:     return ">=";
+	case EXPR_LT_EXT:  return "<+";
+	case EXPR_LTE_EXT: return "<+=";
+	case EXPR_GT_EXT:  return ">+";
+	case EXPR_GTE_EXT: return ">+=";
+	case EXPR_EQ:      return "==";
+	case EXPR_NEQ:     return "!=";
+	case EXPR_LAND:    return "&&";
+	case EXPR_LOR:     return "||";
+	case EXPR_ASSIGN:  return "=";
 	}
 
 	return NULL;
@@ -361,24 +370,28 @@ uint64 ExprNodeFromToken(uint64 token)
 {
 	switch(token)
 	{
-	case '<<': return EXPR_SHL;
-	case '>>': return EXPR_SHR;
-	case '*':  return EXPR_MUL;
-	case '/':  return EXPR_DIV;
-	case '%':  return EXPR_MOD;
-	case '&':  return EXPR_AND;
-	case '^':  return EXPR_XOR;
-	case '|':  return EXPR_OR;
-	case '+':  return EXPR_ADD;
-	case '-':  return EXPR_SUB;
-	case '<':  return EXPR_LT;
-	case '<=': return EXPR_LTE;
-	case '>':  return EXPR_GT;
-	case '>=': return EXPR_GTE;
-	case '==': return EXPR_EQ;
-	case '!=': return EXPR_NEQ;
-	case '&&': return EXPR_LAND;
-	case '||': return EXPR_LOR;
+	case '<<':  return EXPR_SHL;
+	case '>>':  return EXPR_SHR;
+	case '*':   return EXPR_MUL;
+	case '/':   return EXPR_DIV;
+	case '%':   return EXPR_MOD;
+	case '&':   return EXPR_AND;
+	case '^':   return EXPR_XOR;
+	case '|':   return EXPR_OR;
+	case '+':   return EXPR_ADD;
+	case '-':   return EXPR_SUB;
+	case '<':   return EXPR_LT;
+	case '<=':  return EXPR_LTE;
+	case '>':   return EXPR_GT;
+	case '>=':  return EXPR_GTE;
+	case '<+':  return EXPR_LT_EXT;
+	case '<+=': return EXPR_LTE_EXT;
+	case '>+':  return EXPR_GT_EXT;
+	case '>+=': return EXPR_GTE_EXT;
+	case '==':  return EXPR_EQ;
+	case '!=':  return EXPR_NEQ;
+	case '&&':  return EXPR_LAND;
+	case '||':  return EXPR_LOR;
 	}
 
 	return -1ULL;
@@ -388,24 +401,28 @@ uint64 ExprNodePrec(uint64 binop)
 {
 	switch(binop)
 	{
-	case EXPR_SHL:  return 7;
-	case EXPR_SHR:  return 7;
-	case EXPR_MUL:  return 6;
-	case EXPR_DIV:  return 6;
-	case EXPR_MOD:  return 6;
-	case EXPR_AND:  return 5;
-	case EXPR_XOR:  return 5;
-	case EXPR_OR:   return 5;
-	case EXPR_ADD:  return 4;
-	case EXPR_SUB:  return 4;
-	case EXPR_LT:   return 3;
-	case EXPR_LTE:  return 3;
-	case EXPR_GT:   return 3;
-	case EXPR_GTE:  return 3;
-	case EXPR_EQ:   return 2;
-	case EXPR_NEQ:  return 2;
-	case EXPR_LAND: return 1;
-	case EXPR_LOR:  return 0;
+	case EXPR_SHL:     return 7;
+	case EXPR_SHR:     return 7;
+	case EXPR_MUL:     return 6;
+	case EXPR_DIV:     return 6;
+	case EXPR_MOD:     return 6;
+	case EXPR_AND:     return 5;
+	case EXPR_XOR:     return 5;
+	case EXPR_OR:      return 5;
+	case EXPR_ADD:     return 4;
+	case EXPR_SUB:     return 4;
+	case EXPR_LT:      return 3;
+	case EXPR_LTE:     return 3;
+	case EXPR_GT:      return 3;
+	case EXPR_GTE:     return 3;
+	case EXPR_LT_EXT:  return 3;
+	case EXPR_LTE_EXT: return 3;
+	case EXPR_GT_EXT:  return 3;
+	case EXPR_GTE_EXT: return 3;
+	case EXPR_EQ:      return 2;
+	case EXPR_NEQ:     return 2;
+	case EXPR_LAND:    return 1;
+	case EXPR_LOR:     return 0;
 	}
 
 	return -1ULL;

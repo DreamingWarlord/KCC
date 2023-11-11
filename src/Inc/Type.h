@@ -4,22 +4,18 @@
 
 
 #define KIND_VOID    0
-#define KIND_UINT8   1
-#define KIND_UINT16  2
-#define KIND_UINT32  3
-#define KIND_UINT64  4
-#define KIND_INT8    5
-#define KIND_INT16   6
-#define KIND_INT32   7
-#define KIND_INT64   8
-#define KIND_STRUCT  9
-#define KIND_FUNC   10
+#define KIND_INT8    1
+#define KIND_INT16   2
+#define KIND_INT32   3
+#define KIND_INT64   4
+#define KIND_STRUCT  5
+#define KIND_FUNC    6
 
 
 struct Type
 {
-	uint64 kind :  4;
-	uint64 ptrc :  4;
+	uint64 kind :  3;
+	uint64 ptrc :  5;
 	uint64 idx  : 56;
 };
 
@@ -69,5 +65,3 @@ bool TypeCmp(struct Type a, struct Type b);
 bool TypeCastable(struct Type a, struct Type b);
 
 bool TypeInt(struct Type type);
-
-bool TypeSigned(struct Type type);

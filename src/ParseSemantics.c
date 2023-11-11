@@ -75,30 +75,9 @@ void ExprNodeBuildType(struct ExprNode *node)
 	case EXPR_CAST:
 		ExprNodeBuildType(node->lhs);
 
-		if(node->type.kind == KIND_VOID && node->type.ptrc == 0)
-			TokenError(node->token, "Nothing can be cast to void");
+		if(!TypeCastable(node->lhs->type, node->type))
+			TokenError(node->token, "Can't cast %s to %s", TypeStr(node->lhs->type), TypeStr(node->type));
 
-		if(node->lhs->type.kind == KIND_VOID && node->type.ptrc == 0)
-			TokenError(node->token, "Nothing can be cast from void");
-
-		if(node->type.kind == KIND_STRUCT && node->type.ptrc == 0)
-			TokenError(node->token, "Nothing can be cast to a struct");
-
-		if(node->lhs->type.kind == KIND_STRUCT && node->type.ptrc == 0)
-			TokenError(node->token, "Nothing can be cast from a struct");
-
-		if(node->lhs->type.ptrc > 0) {
-			if(node->type.ptrc == 0 && node->type.kind != KIND_UINT64)
-				TokenError(node->token, "Pointers can only be cast to other pointers or uint64");
-		} else {
-			if(node->lhs->type.kind == KIND_UINT64 && (node->type.ptrc > 0))
-				break;
-
-			if(TypeInt(node->lhs->type) && !TypeInt(node->type))
-				TokenError(node->token, "Integers can only be cast to integers");
-		}
-
-		Assert(TypeCastable(node->lhs->type, node->type));
 		break;
 	case EXPR_POST_INC:
 	case EXPR_POST_DEC:
@@ -228,7 +207,7 @@ void ExprNodeBuildType(struct ExprNode *node)
 		if(!TypeInt(node->lhs->type) || !TypeInt(node->rhs->type))
 			TokenError(node->token, "Both sides of logic operation must be integers");
 
-		node->type = (struct Type) { KIND_UINT64, 0, 0 };
+		node->type = (struct Type) { KIND_INT64, 0, 0 };
 		break;
 	}
 }

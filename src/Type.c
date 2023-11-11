@@ -7,7 +7,7 @@
 
 
 static const char *type_name_table[] = {
-	"void", "uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64", "struct"
+	"void", "int8", "int16", "int32", "int64", "struct"
 };
 static struct Struct *struct_table[STRUCT_TABLE_SIZE] = { NULL };
 static struct Function *func_table[FUNC_TABLE_SIZE] = { NULL };
@@ -144,10 +144,6 @@ uint64 TypeSize(struct Type type)
 	switch(type.kind)
 	{
 	case KIND_VOID:   return 0;
-	case KIND_UINT8:  return 1;
-	case KIND_UINT16: return 2;
-	case KIND_UINT32: return 4;
-	case KIND_UINT64: return 8;
 	case KIND_INT8:   return 1;
 	case KIND_INT16:  return 2;
 	case KIND_INT32:  return 4;
@@ -203,31 +199,25 @@ bool TypeCmp(struct Type a, struct Type b)
 
 bool TypeCastable(struct Type a, struct Type b)
 {
-	if(TypeCmp(a, (struct Type) { KIND_VOID, 0, 0 }))
-		return FALSE;
+	if(TypeCmp(a, b))
+		return TRUE;
 
-	if(TypeCmp(b, (struct Type) { KIND_VOID, 0, 0 }))
-		return FALSE;
+	if(a.ptrc > 0 && b.ptrc > 0)
+		return TRUE;
 
-	if((a.kind == KIND_STRUCT && a.ptrc == 0) || (b.kind == KIND_STRUCT && b.ptrc == 0))
-		return FALSE;
+	if(TypeInt(a) && TypeInt(b))
+		return TRUE;
 
-	if(a.ptrc > 0 && b.ptrc == 0 && b.kind != KIND_UINT64)
-		return FALSE;
+	if(a.ptrc > 0 && b.ptrc == 0 && b.kind == KIND_INT64)
+		return TRUE;
 
-	if(a.ptrc == 0 && (a.kind != KIND_UINT64 || b.ptrc == 0) && TypeInt(a) && !TypeInt(b))
-		return FALSE;
+	if(b.ptrc > 0 && a.ptrc == 0 && a.kind == KIND_INT64)
+		return TRUE;
 
-	return TRUE;
+	return FALSE;
 }
 
 bool TypeInt(struct Type type)
 {
-	return type.ptrc == 0 && (type.kind >= KIND_UINT8 && type.kind <= KIND_INT64);
-}
-
-bool TypeSigned(struct Type type)
-{
-	Assert(TypeInt(type));
-	return type.kind > KIND_UINT64;
+	return type.ptrc == 0 && (type.kind >= KIND_INT8 && type.kind <= KIND_INT64);
 }

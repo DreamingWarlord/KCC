@@ -1,7 +1,7 @@
 Keywords
 
 if else for while do goto break continue return sizeof containerof struct union switch
-inline static void uint8 uint16 uint32 uint64 int8 int16 int32 int64 bool const include
+inline static void int8 int16 int32 int64 bool const include
 
 Expression
 
@@ -13,6 +13,7 @@ Primary
 	containerof ( expression , struct identifier, identifier )
 	( expression )
 	type-name ( expression )
+	type-name + ( expression )
 
 Call Argument List
 	expression
@@ -42,7 +43,7 @@ Binary
 	x* x/ x%
 	x& x^ x|
 	x+ x-
-	x< x<= x> x>=
+	x< x<= x> x>= x<+ x<+= x>+ x>+=
 	x== x!=
 	x&&
 	x||
@@ -73,10 +74,6 @@ Argument List
 
 Type Name
 	void
-	uint8
-	uint16
-	uint32
-	uint64
 	int8
 	int16
 	int32
