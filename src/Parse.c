@@ -136,7 +136,7 @@ bool ParseType(struct Type *type)
 
 			TokenFetch();
 			type->kind = KIND_FUNC;
-			type->ptrc++;
+			type->ptrc = 1;
 			type->idx = FunctionFind(func_templ);
 		} else {
 			break;
