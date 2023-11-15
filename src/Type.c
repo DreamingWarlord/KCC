@@ -1,16 +1,14 @@
 #include "Type.h"
 
 
-#define STRUCT_TABLE_SIZE 2048
-#define FUNC_TABLE_SIZE 2048
-#define FUNC_SIZE(funct) (sizeof(struct Function) - 8 + (funct)->count * sizeof(struct Type))
+#define TABLE_SIZE 2048
 
 
 static const char *type_name_table[] = {
 	"void", "int8", "int16", "int32", "int64", "struct"
 };
-static struct Struct *struct_table[STRUCT_TABLE_SIZE] = { NULL };
-static struct Function *func_table[FUNC_TABLE_SIZE] = { NULL };
+static struct Struct *struct_table[TABLE_SIZE] = { NULL };
+static struct Function *func_table[TABLE_SIZE] = { NULL };
 
 
 static bool FuncCmp(struct Function *a, struct Function *b)
@@ -18,13 +16,13 @@ static bool FuncCmp(struct Function *a, struct Function *b)
 	if(a->count != b->count)
 		return FALSE;
 
-	return !memcmp(&a->type, &b->type, FUNC_SIZE(a));
+	return !memcmp(&a->type, &b->type, sizeof(struct Function) - 8);
 }
 
 
 uint64 StructInsert(struct Struct *struc)
 {
-	uint64 hash = Hash(struc->name, strlen(struc->name)) % STRUCT_TABLE_SIZE;
+	uint64 hash = Hash(struc->name, strlen(struc->name)) % TABLE_SIZE;
 
 	if(struct_table[hash] == NULL) {
 		struct_table[hash] = struc;
@@ -47,13 +45,11 @@ uint64 StructInsert(struct Struct *struc)
 		cur->next = struc;
 		return (hash << 32) + list_idx;
 	} while(1);
-
-	Assert(!"Unreachable");
 }
 
 uint64 StructFind(char *name)
 {
-	uint64 hash = Hash(name, strlen(name)) % STRUCT_TABLE_SIZE;
+	uint64 hash = Hash(name, strlen(name)) % TABLE_SIZE;
 	struct Struct *cur = struct_table[hash];
 	uint64 idx = 0;
 
@@ -89,7 +85,7 @@ struct Struct *StructGet(uint64 idx)
 
 uint64 FunctionFind(struct Function *funct)
 {
-	uint64 hash = Hash(&funct->type, FUNC_SIZE(funct)) % FUNC_TABLE_SIZE;
+	uint64 hash = Hash(&funct->type, sizeof(struct Function) - 8) % TABLE_SIZE;
 	struct Function *cur = func_table[hash];
 	uint64 idx = 0;
 
@@ -104,9 +100,8 @@ uint64 FunctionFind(struct Function *funct)
 		idx++;
 	}
 
-	uint64 size = sizeof(struct Function) + funct->count * sizeof(struct Type);
-	struct Function *func = Alloc(size);
-	memcpy(func, funct, size);
+	struct Function *func = Alloc(sizeof(struct Function));
+	*func = *funct;
 
 	if(cur == NULL) {
 		func_table[hash] = func;

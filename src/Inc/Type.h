@@ -3,6 +3,8 @@
 #include "Common.h"
 
 
+#define FUNC_MAX_ARGC 8
+
 #define KIND_VOID    0
 #define KIND_INT8    1
 #define KIND_INT16   2
@@ -42,7 +44,7 @@ struct Function
 	struct Type      type;
 	uint64          count;
 	bool         variadic;
-	struct Type      args[];
+	struct Type      args[FUNC_MAX_ARGC];
 };
 
 

@@ -112,8 +112,8 @@ bool ParseType(struct Type *type)
 					break;
 				}
 
-				if(func_templ->count == 8)
-					TokenError(tok, "Too many function arguments!");
+				if(func_templ->count == FUNC_MAX_ARGC)
+					TokenError(tok, "Too many function arguments");
 
 				if(!ParseType(&func_templ->args[func_templ->count++]))
 					TokenError(tok, "Expected valid function argument type, got %s", TokenStr(tok));
@@ -1330,7 +1330,7 @@ struct Statement *ParseFuncDecl()
 	struct Statement *stmt = Alloc(sizeof(struct Statement));
 	stmt->kind = STMT_FUNC_DECL;
 	stmt->token = tok;
-	struct Function *func_templ = Alloc(sizeof(struct Function) + sizeof(struct Type) * 8);
+	struct Function *func_templ = Alloc(sizeof(struct Function));
 	char *arg_names[8] = { NULL };
 	func_templ->type = ret_type;
 	TokenFetch();
@@ -1352,6 +1352,9 @@ struct Statement *ParseFuncDecl()
 
 		if(tok->tok != TK_IDENT)
 			TokenError(tok, "Expected argument name, got %s", TokenStr(tok));
+
+		if(func_templ->count == FUNC_MAX_ARGC)
+			TokenError(tok, "Too many function arguments");
 
 		arg_names[func_templ->count++] = tok->str;
 		TokenFetch();
