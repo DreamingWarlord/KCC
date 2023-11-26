@@ -115,6 +115,13 @@ Struct Declaration
 	struct identifier { member-list } ;
 	union struct identifier { member-list } ;
 
+Enum Declaration
+	enum { enum-const-list } ;
+
+Enumeration Constant List
+	identifier
+	enum-const-list identifier
+
 Member
 	type-name
 	type-name identifier
@@ -131,6 +138,7 @@ Declaration
 	func-decl
 	func-def
 	struct-decl
+	enum-decl
 
 Statement
 	labeled-statement

@@ -2,6 +2,7 @@
 
 
 #define GLBL_OBJECT_TABLE_SIZE 2048
+#define GLBL_ENUM_TABLE_SIZE   4096
 
 
 struct Scope
@@ -14,6 +15,7 @@ struct Scope
 
 static struct Scope *scope_head = NULL;
 static struct Object *glbl_object_tab[GLBL_OBJECT_TABLE_SIZE] = { NULL };
+static struct EnumConst *glbl_enum_tab[GLBL_ENUM_TABLE_SIZE] = { NULL };
 
 
 static void Indent(uint64 ind)
@@ -616,7 +618,7 @@ bool GlblObjectTableInsert(struct Object *obj)
 			break;
 
 		cur = cur->next;
-	} while(1);
+	} while(TRUE);
 
 	cur->next = obj;
 	return TRUE;
@@ -640,4 +642,51 @@ struct Object *GlblObjectTableFind(char *name)
 struct Object **GlblObjectTable()
 {
 	return glbl_object_tab;
+}
+
+bool GlblEnumTableInsert(char *name, uint64 value)
+{
+	struct EnumConst *obj = Alloc(sizeof(struct EnumConst));
+	obj->name = name;
+	obj->value = value;
+	uint64 hash = Hash(name, strlen(name)) % GLBL_ENUM_TABLE_SIZE;
+	struct EnumConst *cur = glbl_enum_tab[hash];
+
+	if(cur == NULL) {
+		glbl_enum_tab[hash] = obj;
+		return TRUE;
+	}
+
+	do {
+		if(!strcmp(cur->name, name))
+			return FALSE;
+
+		if(cur->next == NULL)
+			break;
+
+		cur = cur->next;
+	} while(TRUE);
+
+	cur->next = obj;
+	return TRUE;
+}
+
+uint64 GlblEnumTableFind(char *name)
+{
+	uint64 hash = Hash(name, strlen(name)) % GLBL_ENUM_TABLE_SIZE;
+	struct EnumConst *cur = glbl_enum_tab[hash];
+
+	while(cur != NULL) {
+		if(!strcmp(cur->name, name))
+			return cur->value;
+
+		cur = cur->next;
+	}
+
+	return -1ULL;
+}
+
+struct EnumConst **GlblEnumTable()
+{
+	return glbl_enum_tab;
 }

@@ -59,6 +59,7 @@
 #define STMT_VAR_DECL   11
 #define STMT_FUNC_DECL  12
 #define STMT_STRUC_DECL 13
+#define STMT_ENUM_DECL  14
 
 
 struct ExprList;
@@ -82,6 +83,13 @@ struct Object
 			struct Object    *args[8];
 		} func;
 	};
+};
+
+struct EnumConst
+{
+	char             *name;
+	uint64           value;
+	struct EnumConst *next;
 };
 
 struct ExprNode
@@ -165,6 +173,12 @@ struct Object *ScopeFind(char *name);
 
 void ScopePop();
 
+bool GlblEnumTableInsert(char *name, uint64 value);
+
+uint64 GlblEnumTableFind(char *name);
+
+struct EnumConst **GlblEnumTable();
+
 bool GlblObjectTableInsert(struct Object *obj);
 
 struct Object *GlblObjectTableFind(char *name);
@@ -230,6 +244,8 @@ struct Statement *ParseStatement();
 struct Statement *ParseStructDecl();
 
 struct Statement *ParseFuncDecl();
+
+struct Statement *ParseEnumDecl();
 
 void ParseIncludes();
 

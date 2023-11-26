@@ -87,7 +87,7 @@ bool ParseType(struct Type *type)
 	if(!ParseTypePrimitive(type))
 		return FALSE;
 
-	while(1) {
+	while(TRUE) {
 		if(tok->tok == '*') {
 			if(type->ptrc == 15)
 				TokenError(tok, "Too many pointers");
@@ -168,6 +168,14 @@ struct ExprNode *ParsePrimary()
 		node->num = tok->num;
 		break;
 	case TK_IDENT:
+		node->kind = EXPR_CONST;
+		node->num = GlblEnumTableFind(tok->str);
+
+		if(node->num != -1ULL) {
+			node->type = (struct Type) { KIND_INT64, 0, 0 };
+			break;
+		}
+
 		node->kind = EXPR_OBJECT;
 		node->obj = ScopeFind(tok->str);
 
@@ -301,7 +309,7 @@ struct ExprNode *ParsePostfix()
 {
 	struct ExprNode *node = ParsePrimary();
 
-	while(1) {
+	while(TRUE) {
 		struct ExprNode *wrapper = Alloc(sizeof(struct ExprNode));
 		wrapper->token = tok;
 	
@@ -520,7 +528,7 @@ struct ExprList *ParseExpressionList(uint64 max_count)
 	struct ExprList *cur = head;
 	uint64 count = 0;
 
-	while(1) {
+	while(TRUE) {
 		cur->node = ParseExpression();
 
 		if(cur->node == NULL)
@@ -656,6 +664,9 @@ struct Statement *ParseVarDecl(bool allow_def)
 	stmt->var_decl.obj = var;
 	TokenFetch();
 
+	if(GlblEnumTableFind(var->name) != -1ULL)
+		TokenError(tok, "Variable %s shadows enumeration constant of the same name", var->name);
+
 	if(!ScopeInsert(var))
 		TokenError(tok, "Variable %s already exists", var->name);
 
@@ -750,7 +761,7 @@ struct Statement *ParseCompound()
 	struct Statement *cur = NULL;
 	TokenFetch();
 
-	while(1) {
+	while(TRUE) {
 		if(tok->tok == '}')
 			break;
 
@@ -981,7 +992,7 @@ struct Statement *ParseSwitch()
 	ScopePush();
 	struct Statement *head = NULL;
 
-	while(1) {
+	while(TRUE) {
 		if(tok->tok == '}')
 			break;
 
@@ -1219,7 +1230,7 @@ struct Statement *ParseStructDecl()
 			TokenError(tok, "struct %s is already defined", name);
 	}
 
-	while(1) {
+	while(TRUE) {
 		if(struc->count >= 128)
 			TokenError(tok, "Too many struct members!");
 
@@ -1423,9 +1434,41 @@ struct Statement *ParseFuncDecl()
 	return stmt;
 }
 
+struct Statement *ParseEnumDecl()
+{
+	if(tok->tok != TK_KWORD || tok->hash != KW_ENUM)
+		return NULL;
+
+	struct Statement *stmt = Alloc(sizeof(struct Statement));
+	stmt->kind = STMT_ENUM_DECL;
+	stmt->token = tok;
+
+	if(TokenFetch() != '{')
+		TokenError(tok, "Expected '{' after enum, got %s", TokenStr(tok));
+
+	TokenFetch();
+	uint64 val = 0;
+
+	while(tok->tok != '}') {
+		if(tok->tok != TK_IDENT)
+			TokenError(tok, "Expected name of enumeration constant, got %s", TokenStr(tok));
+
+		if(!GlblEnumTableInsert(tok->str, val++))
+			TokenError(tok, "Enumeration constant %s already exists", tok->str);
+
+		TokenFetch();
+	}
+
+	if(TokenFetch() != ';')
+		TokenError(tok, "Expected ';', got %s", TokenStr(tok));
+
+	TokenFetch();
+	return stmt;
+}
+
 void ParseIncludes()
 {
-	while(1) {
+	while(TRUE) {
 		if(tok->tok != TK_KWORD || tok->hash != KW_INCLUDE)
 			break;
 
@@ -1447,6 +1490,9 @@ void ParseIncludes()
 struct Statement *ParseDecl()
 {
 	struct Statement *stmt = ParseStructDecl();
+
+	if(stmt == NULL)
+		stmt = ParseEnumDecl();
 
 	if(stmt == NULL)
 		stmt = ParseFuncDecl();

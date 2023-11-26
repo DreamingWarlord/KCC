@@ -44,7 +44,7 @@ uint64 StructInsert(struct Struct *struc)
 
 		cur->next = struc;
 		return (hash << 32) + list_idx;
-	} while(1);
+	} while(TRUE);
 }
 
 uint64 StructFind(char *name)
