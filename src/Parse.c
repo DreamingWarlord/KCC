@@ -98,7 +98,7 @@ bool ParseType(struct Type *type)
 			if(TokenFetch() != '(')
 				TokenError(tok, "Expected '(', got %s", TokenStr(tok));
 
-			struct Function *func_templ = Alloc(sizeof(struct Function) + sizeof(struct Type) * 8);
+			struct Function *func_templ = Alloc(sizeof(struct Function));
 			func_templ->type = *type;
 			TokenFetch();
 
