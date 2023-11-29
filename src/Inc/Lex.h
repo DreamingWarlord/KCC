@@ -13,13 +13,13 @@
 
 struct Token
 {
-	uint64  tok; // Token kind
-	uint64  num; // Integer constant / string length
-	uint64 hash; // String hash
-	char   *str; // String
-	char  *file; // Token file name
-	uint64 line; // Token line
-	uint64  col; // Token column
+	uint64  tok;
+	uint64  num;
+	uint64 hash;
+	char   *str;
+	char  *file;
+	uint64 line;
+	uint64  col;
 };
 
 
