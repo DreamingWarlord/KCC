@@ -622,133 +622,6 @@ struct ExprNode *ParseAssignment(struct ExprNode *left)
 	return node;
 }
 
-struct Statement *ParseVarDecl(bool allow_def)
-{
-	bool is_const = FALSE;
-
-	if(tok->tok == TK_KWORD && tok->hash == KW_CONST) {
-		is_const = TRUE;
-		TokenFetch();
-	}
-
-	struct Type type;
-	struct TokenList *list_head = toklist_head;
-
-	if(!ParseType(&type)) {
-		if(is_const)
-			TokenError(tok, "Expected constant type, got %s", TokenStr(tok));
-
-		return NULL;
-	}
-
-	if(tok->tok != TK_IDENT && !is_const) {
-		toklist_head = list_head;
-		tok = toklist_head->tok;
-		return NULL;
-	}
-
-	if(tok->tok != TK_IDENT && is_const)
-		TokenError(tok, "Expected constant variable name, got %s", TokenStr(tok));
-
-	if(TypeSize(type) == 0)
-		TokenError(tok, "Can't declare a variable of incomplete type");
-
-	struct Object *var = Alloc(sizeof(struct Object));
-	var->name = tok->str;
-	var->type = type;
-	var->count = 1;
-	var->is_const = is_const;
-	struct Statement *stmt = Alloc(sizeof(struct Statement));
-	stmt->kind = STMT_VAR_DECL;
-	stmt->token = tok;
-	stmt->var_decl.obj = var;
-	TokenFetch();
-
-	if(GlblEnumTableFind(var->name) != -1ULL)
-		TokenError(tok, "Variable %s shadows enumeration constant of the same name", var->name);
-
-	if(!ScopeInsert(var))
-		TokenError(tok, "Variable %s already exists", var->name);
-
-	if(tok->tok == ';') {
-		if(is_const)
-			TokenError(tok, "Constant variable has to be assigned to");
-
-		TokenFetch();
-		return stmt;
-	}
-
-	if(tok->tok == '[') {
-		TokenFetch();
-		struct ExprNode *count_node = ParseExpression();
-
-		if(count_node == NULL)
-			TokenError(tok, "Expected array size expression, got %s", TokenStr(tok));
-
-		if(!ExprNodeEvaluate(count_node, &var->count))
-			TokenError(tok, "Array size has to be a constant unsigned integer");
-
-		if(var->count <= 1)
-			TokenError(tok, "Array size has to be greater than 1");
-
-		if(tok->tok != ']')
-			TokenError(tok, "Expected ']', got %s", TokenStr(tok));
-
-		TokenFetch();
-	}
-
-	if(tok->tok == ';') {
-		if(is_const)
-			TokenError(tok, "Constant variable has to be assigned to");
-
-		TokenFetch();
-		return stmt;
-	}
-
-	if(tok->tok != '=')
-		TokenError(tok, "Expected '=', got %s", TokenStr(tok));
-
-	TokenFetch();
-	struct ExprList *expr = NULL;
-
-	if(var->count > 1) {
-		expr = ParseExpressionList(var->count);
-
-		if(expr == NULL)
-			TokenError(tok, "Expected expression list, got %s", TokenStr(tok));
-	} else {
-		expr = Alloc(sizeof(struct ExprList));
-		expr->node = ParseExpression();
-
-		if(expr->node == NULL)
-			TokenError(tok, "Expected expression, got %s", TokenStr(tok));
-	}
-
-	if(is_const) {
-		struct ExprList *cur = expr;
-
-		while(cur != NULL) {
-			if(!ExprNodeConst(cur->node))
-				TokenError(tok, "Expected constant expression list for constant variable");
-
-			cur = cur->next;
-		}
-
-		var->expr = expr;
-	} else {
-		stmt->var_decl.expr = expr;
-
-		if(!allow_def)
-			TokenError(tok, "Definition of non-const variable in global scope is not allowed");
-	}
-
-	if(tok->tok != ';')
-		TokenError(tok, "Expected ';', got %s", TokenStr(tok));
-
-	TokenFetch();
-	return stmt;
-}
-
 struct Statement *ParseCompound()
 {
 	if(tok->tok != '{')
@@ -1156,6 +1029,135 @@ struct Statement *ParseStatement()
 	if(stmt != NULL)
 		stmt->label = stmt_label;
 
+	return stmt;
+}
+
+struct Statement *ParseVarDecl(bool allow_def)
+{
+	bool is_const = FALSE;
+
+	if(tok->tok == TK_KWORD && tok->hash == KW_CONST) {
+		is_const = TRUE;
+		TokenFetch();
+	}
+
+	struct Type type;
+	struct TokenList *list_head = toklist_head;
+
+	if(!ParseType(&type)) {
+		if(is_const)
+			TokenError(tok, "Expected constant type, got %s", TokenStr(tok));
+
+		return NULL;
+	}
+
+	if(tok->tok != TK_IDENT && !is_const) {
+		toklist_head = list_head;
+		tok = toklist_head->tok;
+		return NULL;
+	}
+
+	if(tok->tok != TK_IDENT && is_const)
+		TokenError(tok, "Expected constant variable name, got %s", TokenStr(tok));
+
+	if(TypeSize(type) == 0)
+		TokenError(tok, "Can't declare a variable of incomplete type");
+
+	struct Object *var = Alloc(sizeof(struct Object));
+	var->name = tok->str;
+	var->type = type;
+	var->count = 1;
+	var->is_const = is_const;
+	struct Statement *stmt = Alloc(sizeof(struct Statement));
+	stmt->kind = STMT_VAR_DECL;
+	stmt->token = tok;
+	stmt->var_decl.obj = var;
+	TokenFetch();
+
+	if(GlblEnumTableFind(var->name) != -1ULL)
+		TokenError(tok, "Variable %s shadows enumeration constant of the same name", var->name);
+
+	if(!ScopeInsert(var))
+		TokenError(tok, "Variable %s already exists", var->name);
+
+	var->is_local = GlblEnumTableFind(var->name) == -1ULL;
+
+	if(tok->tok == ';') {
+		if(is_const)
+			TokenError(tok, "Constant variable has to be assigned to");
+
+		TokenFetch();
+		return stmt;
+	}
+
+	if(tok->tok == '[') {
+		TokenFetch();
+		struct ExprNode *count_node = ParseExpression();
+
+		if(count_node == NULL)
+			TokenError(tok, "Expected array size expression, got %s", TokenStr(tok));
+
+		if(!ExprNodeEvaluate(count_node, &var->count))
+			TokenError(tok, "Array size has to be a constant unsigned integer");
+
+		if(var->count <= 1)
+			TokenError(tok, "Array size has to be greater than 1");
+
+		if(tok->tok != ']')
+			TokenError(tok, "Expected ']', got %s", TokenStr(tok));
+
+		TokenFetch();
+	}
+
+	if(tok->tok == ';') {
+		if(is_const)
+			TokenError(tok, "Constant variable has to be assigned to");
+
+		TokenFetch();
+		return stmt;
+	}
+
+	if(tok->tok != '=')
+		TokenError(tok, "Expected '=', got %s", TokenStr(tok));
+
+	TokenFetch();
+	struct ExprList *expr = NULL;
+
+	if(var->count > 1) {
+		expr = ParseExpressionList(var->count);
+
+		if(expr == NULL)
+			TokenError(tok, "Expected expression list, got %s", TokenStr(tok));
+	} else {
+		expr = Alloc(sizeof(struct ExprList));
+		expr->node = ParseExpression();
+
+		if(expr->node == NULL)
+			TokenError(tok, "Expected expression, got %s", TokenStr(tok));
+	}
+
+	if(is_const) {
+		struct ExprList *cur = expr;
+
+		while(cur != NULL) {
+			if(!ExprNodeConst(cur->node))
+				TokenError(tok, "Expected constant expression list for constant variable");
+
+			cur = cur->next;
+		}
+
+		var->expr = expr;
+	} else {
+		stmt->var_decl.expr = expr;
+
+		if(!allow_def)
+			TokenError(tok, "Definition of non-const variable in global scope is not allowed");
+	}
+
+	if(tok->tok != ';')
+		TokenError(tok, "Expected ';', got %s", TokenStr(tok));
+
+	TokenFetch();
 	return stmt;
 }
 
