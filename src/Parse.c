@@ -1080,7 +1080,10 @@ struct Statement *ParseVarDecl(bool allow_def)
 	if(!ScopeInsert(var))
 		TokenError(tok, "Variable %s already exists", var->name);
 
-	var->is_local = GlblEnumTableFind(var->name) == -1ULL;
+	if(GlblEnumTableFind(var->name) == -1ULL) {
+		var->is_local = TRUE;
+		var->ir_stk_off = -1ULL;
+	}
 
 	if(tok->tok == ';') {
 		if(is_const)
