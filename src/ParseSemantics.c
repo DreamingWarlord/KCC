@@ -168,6 +168,9 @@ void ExprNodeBuildType(struct ExprNode *node)
 		if(!TypeCastable(node->lhs->type, node->rhs->type))
 			TokenError(node->token, "Incompatible types when assigning");
 
+		if(node->lhs->type.kind == KIND_STRUCT || node->rhs->type.kind == KIND_STRUCT)
+			TokenError(node->token, "Struct types cannot be assigned, manually copy instead");
+
 		node->type = node->lhs->type;
 		break;
 	case EXPR_TERNARY:
