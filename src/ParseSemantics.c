@@ -96,7 +96,7 @@ void ExprNodeBuildType(struct ExprNode *node)
 
 		break;
 	case EXPR_MEMBER:
-	case EXPR_MEMBER_DREF:
+	case EXPR_MEMBER_DREF: {
 		ExprNodeBuildType(node->lhs);
 
 		if(node->kind == EXPR_MEMBER_DREF) {
@@ -120,12 +120,38 @@ void ExprNodeBuildType(struct ExprNode *node)
 		if(memb == NULL)
 			TokenError(node->token, "Struct %s does not contain %s", struc->name, node->member);
 
+		struct ExprNode *node_add = Alloc(sizeof(struct ExprNode));
+		node_add->kind = EXPR_ADD;
+		node_add->type = memb->type;
+		node_add->type.ptrc++;
+		node_add->token = node->token;
+
+		if(node->kind != EXPR_MEMBER_DREF) {
+			struct ExprNode *node_addrof = Alloc(sizeof(struct ExprNode));
+			node_addrof->kind = EXPR_ADDROF;
+			node_addrof->type = (struct Type) { KIND_INT64, 0, 0 };
+			node_addrof->token = node->token;
+			node_addrof->lhs = node->lhs;
+			node_add->lhs = node_addrof;
+		} else {
+			node_add->lhs = node->lhs;
+		}
+
+		struct ExprNode *node_off = Alloc(sizeof(struct ExprNode));
+		node_off->kind = EXPR_CONST;
+		node_off->type = (struct Type) { KIND_INT64, 0, 0 };
+		node_off->token = node->token;
+		node_off->num = memb->offset;
+		node_add->rhs = node_off;
+		node->kind = EXPR_DREF;
 		node->type = memb->type;
+		node->lhs = node_add;
 
 		if(memb->count != 1)
 			node->type.ptrc++;
 
 		break;
+	}
 	case EXPR_NEG:
 	case EXPR_NOT:
 	case EXPR_LNOT:
