@@ -1063,6 +1063,12 @@ struct Statement *ParseVarDecl(bool allow_def)
 	if(TypeSize(type) == 0)
 		TokenError(tok, "Can't declare a variable of incomplete type");
 
+	if(TypeSize(type) > 8)
+		TokenError(tok, "Cannot declare a variable with >8 size");
+
+	if(TypeSize(type) & (TypeSize(type) - 1))
+		TokenError(tok, "Can't declare a variable with a non power of 2 size");
+
 	struct Object *var = Alloc(sizeof(struct Object));
 	var->name = tok->str;
 	var->type = type;

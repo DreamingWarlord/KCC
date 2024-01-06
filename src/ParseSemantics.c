@@ -179,6 +179,12 @@ void ExprNodeBuildType(struct ExprNode *node)
 		if(node->lhs->type.kind == KIND_FUNC && node->lhs->type.ptrc == 1)
 			TokenError(node->token, "Cannot dereference function pointer");
 
+		if(TypeSize(node->lhs->type) > 8)
+			TokenError(node->token, "Cannot dereference object with >8 size");
+
+		if(TypeSize(node->lhs->type) & (TypeSize(node->lhs->type) - 1))
+			TokenError(node->token, "Cannot dereference object with non power of 2 size");
+
 		node->type = node->lhs->type;
 		node->type.ptrc--;
 		break;
